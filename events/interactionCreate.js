@@ -1,8 +1,4 @@
-const { Events, MessageFlags, Collection } = require('discord.js');
-const { UseMainPlayer } = require ("discord-player");
-const SpotifyWebApi = require("spotify-web-api-node");
-const { spotifyid, clientsecret } = require("../config.json");
-const spotifyApi = new SpotifyWebApi({ clientId: spotifyid, clientSecret: clientsecret });
+const { Events } = require('discord.js');
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -12,7 +8,7 @@ module.exports = {
         const command = interaction.client.commands.get(interaction.commandName);
 
 		if (!command) {
-			console.error(`No command matching ${interaction.commandName} was found.`);
+			console.error(`Nenhum comando correspondente a ${interaction.commandName} foi encontrado.`);
 			return;
 		}
 
@@ -21,11 +17,10 @@ module.exports = {
 		} catch (error) {
 			console.error(error);
 			if (interaction.replied || interaction.deferred) {
-				await interaction.followUp({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
+				await interaction.followUp({ content: 'Ocorreu um erro ao executar este comando!', ephemeral: true });
 			} else {
-				await interaction.reply({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
+				await interaction.reply({ content: 'Ocorreu um erro ao executar este comando!', ephemeral: true });
 			}
 		}
 	},
 };
-

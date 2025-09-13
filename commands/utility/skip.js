@@ -1,20 +1,26 @@
 const { SlashCommandBuilder } = require("discord.js");
-const { useMainPlayer } = require("discord-player");
+const { useQueue } = require("discord-player")
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("skip")
-    .setDescription("Pula a música atual"),
+    .setDescription("Pula a música atual."),
 
   async execute(interaction) {
-    const player = useMainPlayer();
-    const queue = player.nodes.get(interaction.guildId);
+    const queue = useQueue(interaction.guild);
 
-    if (!queue || !queue.isPlaying()) {
-      return interaction.reply("❌ Nenhuma música está tocando agora.");
+    if (!queue) {
+      return interaction.reply("❌ A fila está vazia.");
     }
 
-    await queue.node.skip();
-    return interaction.reply("⏭️ Música pulada!");
+    if (!queue.isPlaying()){
+        return interaction.reply('Não há nenhuma música tocando.');
+    }
+
+  // Skip the current track
+  queue.node.skip();
+ 
+  // Send a confirmation message
+  return interaction.reply('A música foi pulada.');
   },
 };

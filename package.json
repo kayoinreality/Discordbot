@@ -2,6 +2,7 @@
   "name": "discordbot",
   "version": "1.0.0",
   "main": "server.js",
+  "type": "commonjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
@@ -14,9 +15,14 @@
     "@discord-player/extractor": "^7.1.0",
     "@discordjs/opus": "^0.10.0",
     "@discordjs/voice": "^0.19.0",
+    "@distube/soundcloud": "^2.0.4",
+    "@distube/spotify": "^2.0.2",
+    "@distube/yt-dlp": "^2.0.1",
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "discord-player": "^7.1.0",
     "discord-player-youtubei": "^1.5.0",
     "discord.js": "^14.22.1",
+    "distube": "^5.0.7",
     "dotenv": "^17.2.2",
     "ffmpeg-static": "^5.2.0",
     "libsodium-wrappers": "^0.7.15",
