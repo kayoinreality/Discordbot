@@ -1,25 +1,16 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, GatewayIntentBits, Collection, MessageFlags, Events } = require('discord.js');
+const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const { token } = require('./config.json');
 const { Player } = require('discord-player');
-const { DefaultExtractors, YoutubeExtractor, YtmusicExtractor } = require('@discord-player/extractor');
+const { DefaultExtractors } = require('@discord-player/extractor');
 
-/*//pega o token do .env (preferi usar o config.json)
-const dotenv = require('dotenv');
-dotenv.config();
-
-const token = process.env.TOKEN;*/
-
-// Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessages,GatewayIntentBits.MessageContent] });
 
 const player = new Player(client);
-async function init() {
-    await player.extractors.register(YtmusicExtractor, {});
-    await player.extractors.register(YoutubeExtractor, {});
-}
-init().catch(console.error);;
+
+// Carrega os extratores da forma padrão e mais compatível
+player.extractors.loadMulti(DefaultExtractors);
 
 client.cooldowns = new Collection();
 client.commands = new Collection();

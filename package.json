@@ -21,7 +21,8 @@
     "libsodium-wrappers": "^0.7.15",
     "openai": "^5.20.2",
     "opusscript": "^0.0.8",
-    "spotify-web-api-node": "^5.0.2"
+    "spotify-web-api-node": "^5.0.2",
+    "ytdl-core": "^4.11.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.35.0",
