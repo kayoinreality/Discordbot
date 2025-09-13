@@ -1,10 +1,15 @@
 const { Events, MessageFlags, Collection } = require('discord.js');
+const { UseMainPlayer } = require ("discord-player");
+const SpotifyWebApi = require("spotify-web-api-node");
+const { spotifyid, clientsecret } = require("../config.json");
+const spotifyApi = new SpotifyWebApi({ clientId: spotifyid, clientSecret: clientsecret });
 
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(interaction) {
-        const command = interaction.client.commands.get(interaction.commandName);
 		if (!interaction.isChatInputCommand()) return;
+
+        const command = interaction.client.commands.get(interaction.commandName);
 
 		if (!command) {
 			console.error(`No command matching ${interaction.commandName} was found.`);
