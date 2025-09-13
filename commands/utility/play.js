@@ -1,11 +1,12 @@
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const { useMainPlayer, QueryType } = require("discord-player");
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js"); // Importe o EmbedBuilder
+const { useMainPlayer } = require("discord-player");
 const SpotifyWebApi = require("spotify-web-api-node");
 
 // Configura o cliente do Spotify
 const { spotifyid, clientsecret, redirecturl } = require("../../config.json");
 const spotifyApi = new SpotifyWebApi({ clientId: spotifyid, clientSecret: clientsecret, redirecturl });
 
+// Função auxiliar: busca metadados no Spotify
 async function getTrackFromSpotify(url) {
   const trackId = url.split("/track/")[1].split("?")[0];
   const data = await spotifyApi.getTrack(trackId);
@@ -20,7 +21,7 @@ module.exports = {
     .addStringOption(option =>
       option
         .setName("query")
-        .setDescription("Nome ou link da música")
+        .setDescription("Nome ou link da música (YouTube/Spotify)")
         .setRequired(true)
     ),
 
@@ -34,63 +35,38 @@ module.exports = {
     }
 
     try {
-      await interaction.deferReply();
+      let searchQuery = query;
 
-      let result;
-      const queryLower = query.toLowerCase();
+      // Se for link do Spotify
+      if (query.includes("open.spotify.com/track")) {
+        const token = await spotifyApi.clientCredentialsGrant();
+        spotifyApi.setAccessToken(token.body.access_token);
 
-      // --- NOVA LÓGICA DE ROTEAMENTO MANUAL ---
-
-      // Caso 1: A query é um link do YouTube Music
-      if (queryLower.includes("music.youtube.com")) {
-        result = await player.search(query, {
-          requestedBy: interaction.user,
-          searchEngine: QueryType.YOUTUBE_MUSIC,
-        });
-      }
-      // Caso 2: A query é um link do YouTube normal
-      else if (queryLower.includes("youtube.com") || queryLower.includes("youtu.be")) {
-        result = await player.search(query, {
-          requestedBy: interaction.user,
-          searchEngine: QueryType.YOUTUBE_VIDEO,
-        });
-      }
-      // Caso 3: A query é um link do Spotify
-      else if (queryLower.includes("http://googleusercontent.com/spotify.com/18")) {
-        const searchText = await getTrackFromSpotify(query);
-        // Busca o texto do spotify no youtube music
-        result = await player.search(searchText, {
-          requestedBy: interaction.user,
-          searchEngine: QueryType.YOUTUBE_MUSIC,
-        });
-      }
-      // Caso 4: A query é um texto para busca
-      else {
-        result = await player.search(query, {
-          requestedBy: interaction.user,
-          searchEngine: QueryType.YOUTUBE_MUSIC, // Prioriza YT Music para precisão
-        });
+        searchQuery = await getTrackFromSpotify(query);
+        await interaction.reply(`🔎 Buscando no YouTube: **${searchQuery}**...`);
+      } else {
+        await interaction.reply(`🔎 Procurando: **${query}**...`);
       }
 
-      // Fallback final: Se nenhuma das lógicas acima encontrar algo, tenta uma busca geral no YouTube
-      if (!result || !result.tracks.length) {
-        result = await player.search(query, {
-          requestedBy: interaction.user,
-          searchEngine: QueryType.YOUTUBE_VIDEO,
-        });
-      }
+      // Pesquisa e toca
+      const result = await player.search(searchQuery, {
+        requestedBy: interaction.user,
+      });
 
       if (!result || !result.tracks.length) {
-        return interaction.editReply(`❌ Não encontrei resultados para "${query}"!`);
+        return interaction.editReply("❌ Não encontrei essa música!");
       }
 
       const track = result.tracks[0];
+
       await player.play(channel, track, {
-        nodeOptions: { metadata: interaction.channel },
+        nodeOptions: {
+          metadata: interaction.channel,
+        },
       });
 
+      // Cria o embed com as informações da música
       const embed = new EmbedBuilder()
-        // ... (código do embed continua o mesmo)
         .setColor('#0099ff')
         .setTitle(track.title)
         .setURL(track.url)
@@ -100,10 +76,10 @@ module.exports = {
         .setTimestamp()
         .setFooter({ text: `Adicionada por ${interaction.user.tag}` });
 
-      await interaction.editReply({ content: `🎶 Adicionado à fila:`, embeds: [embed] });
+      await interaction.editReply({ embeds: [embed] });
 
     } catch (error) {
-      console.error("Erro no comando /play:", error);
+      console.error(error);
       return interaction.editReply("❌ Ocorreu um erro ao tentar tocar a música.");
     }
   },
